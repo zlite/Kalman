@@ -11,11 +11,27 @@ For any technical questions, visit http://www.sunfounder.com/forum
 #define SIG A0 //SIG attach to A0 of control board
 unsigned long rxTime;
 float distance;
+float revised_distance;
+float previous = 0;
+float measurement_error = 0.1;
+float probability = 0.8;
+float olddata = 0;
+
 
 void setup() 
 {
   // put your setup code here, to run once:
   Serial.begin(115200);
+}
+
+float kalman(float newdata)
+{
+  float temp;
+  temp = newdata - ((newdata - olddata) * probability);
+  olddata = temp;
+  return temp;
+  // compare new data with old data, apply some probability, make that the new newdata
+  // make new data old data
 }
 
 void loop() {
@@ -40,8 +56,11 @@ void loop() {
   {
     distance=0;
   }
-  Serial.print("distance: "); //print distance: 
-  Serial.print(distance); //print the distance
-  Serial.println("CM"); //and the unit
-  delay(10);
+//  Serial.print("distance: "); //print distance: 
+//  Serial.println(distance); //print the distance
+//  Serial.println("CM"); //and the unit
+  revised_distance = kalman (distance);
+//  Serial.print("Revised distance: ");
+  Serial.println(revised_distance);
+  delay(100);
 }
