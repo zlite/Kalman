@@ -12,10 +12,12 @@ For any technical questions, visit http://www.sunfounder.com/forum
 unsigned long rxTime;
 float distance;
 float revised_distance;
+float revised_distance2;
 float previous = 0;
 float measurement_error = 0.1;
 float probability = 0.8;
 float olddata = 0;
+float olddata2 =0;
 
 
 void setup() 
@@ -24,14 +26,21 @@ void setup()
   Serial.begin(115200);
 }
 
+float average(float newdata)
+{
+  float temp;
+  temp = (newdata + olddata2)/2;
+  olddata2 = newdata;
+  return temp;
+}
+
+
 float kalman(float newdata)
 {
   float temp;
   temp = newdata - ((newdata - olddata) * probability);
   olddata = temp;
   return temp;
-  // compare new data with old data, apply some probability, make that the new newdata
-  // make new data old data
 }
 
 void loop() {
@@ -60,7 +69,9 @@ void loop() {
 //  Serial.println(distance); //print the distance
 //  Serial.println("CM"); //and the unit
   revised_distance = kalman (distance);
+  revised_distance2 = average(distance);
 //  Serial.print("Revised distance: ");
   Serial.println(revised_distance);
+//  Serial.println(revised_distance2);
   delay(100);
 }
