@@ -1,10 +1,9 @@
 /******************************************
- * Name:SF-SR02 Ultrasonic Module
- * Function:Detection the distance
-For any technical questions, visit http://www.sunfounder.com/forum
- **********************************************/
-//Email: service@sunfounder.com
-//Website: www.sunfounder.com
+ * Test of various filtering methods
+ * By Chris Anderson, 2018
+ * Based on SF-SR02 Ultrasonic Module sampling code by SunFounder
+ */
+
 
 #include <Wire.h>
 
@@ -17,7 +16,9 @@ float previous = 0;
 float measurement_error = 0.1;
 float probability = 0.8;
 float olddata = 0;
-float olddata2 =0;
+float olddata2 = 0;
+float ema2 = 0; // previous ema
+float ema = 0; // current ema
 
 
 void setup() 
@@ -26,7 +27,25 @@ void setup()
   Serial.begin(115200);
 }
 
-float average(float newdata)
+float weighted_average(float newdata)  // exponential moving average
+/*
+EMA [current] = (Value [current] x K) + (EMA [previous] x (1 – K))
+
+Where:
+K = 2 ÷(N + 1)
+N = the length of the EMA
+
+In our case, we'll set N to 10, so K = 0.1818
+ */
+
+{
+  float k = 0.1818; // standard expontial weight for ten points
+  ema = (newdata * k) + (ema2 * (1-k));
+  ema2 = ema; // move current reading to previous reading
+  return ema;
+}
+
+float average(float newdata) //simple 2-point moving average 
 {
   float temp;
   temp = (newdata + olddata2)/2;
@@ -35,7 +54,7 @@ float average(float newdata)
 }
 
 
-float kalman(float newdata)
+float kalman(float newdata)  // single-state Kalman
 {
   float temp;
   temp = newdata - ((newdata - olddata) * probability);
@@ -68,10 +87,15 @@ void loop() {
 //  Serial.print("distance: "); //print distance: 
 //  Serial.println(distance); //print the distance
 //  Serial.println("CM"); //and the unit
-  revised_distance = kalman (distance);
-  revised_distance2 = average(distance);
+
 //  Serial.print("Revised distance: ");
-  Serial.println(revised_distance);
-//  Serial.println(revised_distance2);
-  delay(100);
+  Serial.print(kalman (distance));
+  Serial.print(" ");
+  Serial.print(average(distance));
+  Serial.print(" ");
+  Serial.print(weighted_average(distance));
+  Serial.print(" ");
+  Serial.println(distance);
+
+  delay(20);
 }
