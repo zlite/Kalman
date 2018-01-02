@@ -39,7 +39,7 @@ In our case, we'll set N to 10, so K = 0.1818
  */
 
 {
-  float k = 0.1818; // standard expontial weight for ten points
+  float k = 0.1818; // standard exponential weight for ten points
   ema = (newdata * k) + (ema2 * (1-k));
   ema2 = ema; // move current reading to previous reading
   return ema;
