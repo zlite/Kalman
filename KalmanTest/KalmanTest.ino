@@ -137,8 +137,9 @@ void loop() {
     distance=0;
   }
 
-  //Serial.print(kalman(distance));
-  Serial.print(melting_icecream(distance,dt))
+  Serial.print(kalman(distance));
+  Serial.print(" ");
+  Serial.print(melting_icecream(distance,dt));
   Serial.print(" ");
   Serial.print(average(distance));
   Serial.print(" ");
